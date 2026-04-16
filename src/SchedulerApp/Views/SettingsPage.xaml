@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SchedulerApp.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SchedulerApp.ViewModels"
+    BackgroundColor="{AppThemeBinding Light={StaticResource SettingsBgLight}, Dark={StaticResource Black}}"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ── Header ── -->
+        <Grid
+            Grid.Row="0"
+            Padding="16,12"
+            ColumnDefinitions="Auto,*,Auto"
+            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SettingsCardDark}}">
+            <Button
+                Grid.Column="0"
+                Text="Cancel"
+                FontSize="16"
+                TextColor="{StaticResource AppAccent}"
+                BackgroundColor="Transparent"
+                Padding="0"
+                Command="{Binding CancelCommand}" />
+            <Label
+                Grid.Column="1"
+                Text="Work Preferences"
+                FontSize="17"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+            <Button
+                Grid.Column="2"
+                Text="Save"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{StaticResource AppAccent}"
+                BackgroundColor="Transparent"
+                Padding="0"
+                Command="{Binding SaveCommand}" />
+        </Grid>
+
+        <!-- ── Content ── -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,24" Spacing="32">
+
+                <!-- Validation error -->
+                <Border
+                    IsVisible="{Binding ValidationError, Converter={StaticResource IsNotNullConverter}}"
+                    BackgroundColor="{StaticResource AppError}"
+                    Stroke="Transparent"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,10">
+                    <Label
+                        Text="{Binding ValidationError}"
+                        TextColor="White"
+                        FontSize="14" />
+                </Border>
+
+                <!-- ── Working Hours ── -->
+                <VerticalStackLayout Spacing="12">
+                    <Label
+                        Text="WORKING HOURS"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource SubtleGray}"
+                        Margin="4,0,0,0" />
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SettingsCardDark}}"
+                        Stroke="Transparent"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label
+                                    Text="Start"
+                                    FontSize="13"
+                                    TextColor="{StaticResource SubtleGray}" />
+                                <TimePicker
+                                    Time="{Binding WorkStartTime}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                                    FontSize="16" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                <Label
+                                    Text="End"
+                                    FontSize="13"
+                                    TextColor="{StaticResource SubtleGray}" />
+                                <TimePicker
+                                    Time="{Binding WorkEndTime}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                                    FontSize="16" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- ── Working Days ── -->
+                <VerticalStackLayout Spacing="12">
+                    <Label
+                        Text="WORKING DAYS"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource SubtleGray}"
+                        Margin="4,0,0,0" />
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SettingsCardDark}}"
+                        Stroke="Transparent"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16,4">
+                        <VerticalStackLayout Spacing="0">
+
+                            <!-- Monday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Monday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Monday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource DividerDark}}" />
+
+                            <!-- Tuesday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Tuesday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Tuesday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource DividerDark}}" />
+
+                            <!-- Wednesday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Wednesday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Wednesday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource DividerDark}}" />
+
+                            <!-- Thursday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Thursday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Thursday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource DividerDark}}" />
+
+                            <!-- Friday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Friday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Friday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource DividerDark}}" />
+
+                            <!-- Saturday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Saturday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Saturday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource DividerDark}}" />
+
+                            <!-- Sunday -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Sunday"
+                                    FontSize="16"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                <Switch
+                                    Grid.Column="1"
+                                    IsToggled="{Binding Sunday}"
+                                    OnColor="{StaticResource AppAccent}" />
+                            </Grid>
+
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

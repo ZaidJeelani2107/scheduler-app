@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SchedulerApp.Views.DayView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SchedulerApp.ViewModels"
+    xmlns:views="clr-namespace:SchedulerApp.Views"
+    BackgroundColor="{AppThemeBinding Light={StaticResource PageBgLight}, Dark={StaticResource PageBgDark}}"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ── Date Navigation Bar ── -->
+        <Grid
+            Grid.Row="0"
+            Padding="16,12"
+            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+            ColumnDefinitions="40,*,40,40">
+            <Button
+                Grid.Column="0"
+                Text="‹"
+                FontSize="22"
+                FontAttributes="Bold"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource AppAccent}"
+                Command="{Binding NavigateDayCommand}"
+                CommandParameter="{x:Int32 -1}"
+                Padding="0" />
+            <Label
+                Grid.Column="1"
+                Text="{Binding DateLabel}"
+                FontSize="17"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+            <Button
+                Grid.Column="2"
+                Text="›"
+                FontSize="22"
+                FontAttributes="Bold"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource AppAccent}"
+                Command="{Binding NavigateDayCommand}"
+                CommandParameter="{x:Int32 1}"
+                Padding="0" />
+            <Button
+                Grid.Column="3"
+                Text="⚙"
+                FontSize="18"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource SubtleGray}"
+                Command="{Binding OpenSettingsCommand}"
+                Padding="0" />
+        </Grid>
+
+        <!-- ── Timeline ── -->
+        <ScrollView Grid.Row="1">
+            <Grid ColumnDefinitions="48,*" Padding="0,8,8,8">
+
+                <!-- Hour labels — populated dynamically by DayView.xaml.cs based on user work hours -->
+                <VerticalStackLayout x:Name="HourLabelsLayout" Grid.Column="0" />
+
+                <!-- AbsoluteLayout timeline — height, dividers, and event blocks
+                     all set dynamically by DayView.xaml.cs code-behind -->
+                <AbsoluteLayout
+                    x:Name="TimelineLayout"
+                    Grid.Column="1" />
+            </Grid>
+        </ScrollView>
+
+        <!-- ── Empty State (sits on top of scrollview, shown when no events) ── -->
+        <VerticalStackLayout
+            Grid.Row="1"
+            IsVisible="{Binding HasNoEvents}"
+            VerticalOptions="Center"
+            HorizontalOptions="Center"
+            Spacing="6"
+            InputTransparent="True">
+            <Label
+                Text="No events today"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                HorizontalOptions="Center" />
+            <Label
+                Text="Use the input below to schedule one."
+                FontSize="13"
+                TextColor="{StaticResource SubtleGray}"
+                HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- ── AI Input Bar ── -->
+        <Grid
+            Grid.Row="2"
+            Padding="12,10"
+            ColumnDefinitions="*,Auto"
+            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+            <Border
+                Grid.Column="0"
+                Stroke="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource InputStrokeDark}}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 22"
+                Padding="14,10"
+                BackgroundColor="{AppThemeBinding Light={StaticResource InputBgLight}, Dark={StaticResource InputBgDark}}">
+                <Entry
+                    x:Name="AiEntry"
+                    Text="{Binding AiInputText}"
+                    Placeholder="Add event or task..."
+                    PlaceholderColor="{StaticResource SubtleGray}"
+                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                    BackgroundColor="Transparent"
+                    ReturnType="Send"
+                    ReturnCommand="{Binding SubmitAiInputCommand}"
+                    FontSize="15" />
+            </Border>
+            <Button
+                Grid.Column="1"
+                Text="→"
+                FontSize="18"
+                FontAttributes="Bold"
+                BackgroundColor="{StaticResource AppAccent}"
+                TextColor="White"
+                CornerRadius="22"
+                WidthRequest="44"
+                HeightRequest="44"
+                Margin="8,0,0,0"
+                Command="{Binding SubmitAiInputCommand}">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Property="Opacity" Value="0.35" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Button>
+        </Grid>
+
+        <!-- ── Loading Overlay ── -->
+        <Grid
+            Grid.RowSpan="3"
+            IsVisible="{Binding IsLoading}"
+            BackgroundColor="#80000000">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="12">
+                <ActivityIndicator
+                    IsRunning="{Binding IsLoading}"
+                    Color="White"
+                    WidthRequest="40"
+                    HeightRequest="40" />
+                <Label
+                    Text="AI is scheduling..."
+                    TextColor="White"
+                    FontSize="15"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- ── Error Banner ── -->
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+            BackgroundColor="{StaticResource AppError}"
+            Stroke="Transparent"
+            StrokeShape="RoundRectangle 8"
+            Margin="16,60,16,0"
+            Padding="12,10"
+            VerticalOptions="Start">
+            <Label
+                Text="{Binding ErrorMessage}"
+                TextColor="White"
+                FontSize="14"
+                HorizontalOptions="Center" />
+        </Border>
+
+        <!-- ── Confirmation Card Overlay ──
+             Overlay is shown/hidden and animated from DayView.xaml.cs code-behind.
+             BindingContext here = DayViewModel; ConfirmationCardView receives PendingConfirmation. -->
+        <Grid
+            x:Name="ConfirmationOverlay"
+            Grid.RowSpan="3"
+            IsVisible="False"
+            BackgroundColor="#60000000">
+
+            <Border
+                x:Name="ConfirmationSheet"
+                VerticalOptions="End"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 20,20,0,0"
+                Padding="20,24,20,36">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Display portion — BindingContext = ScheduleResultViewModel -->
+                    <views:ConfirmationCardView BindingContext="{Binding PendingConfirmation}" />
+
+                    <!-- ── Alternatives (conflict flow) ── -->
+                    <CollectionView
+                        IsVisible="{Binding PendingConfirmation.HasConflict}"
+                        ItemsSource="{Binding PendingConfirmation.Alternatives}"
+                        SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AlternativeSlotViewModel">
+                                <Border
+                                    Margin="0,4,0,0"
+                                    Stroke="{StaticResource AppAccent}"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,10">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AcceptConfirmationCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label
+                                            Text="{Binding Label}"
+                                            FontSize="14"
+                                            FontAttributes="Bold"
+                                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+                                        <Label
+                                            Text="{Binding TimeRange}"
+                                            FontSize="12"
+                                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextLight}, Dark={StaticResource SecondaryTextDark}}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- ── Reschedule / Accept / Dismiss (no conflict) ── -->
+                    <VerticalStackLayout
+                        IsVisible="{Binding PendingConfirmation.HasNoConflict}"
+                        Spacing="10">
+                        <Button
+                            Text="Reschedule"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource AppAccent}"
+                            BorderColor="{StaticResource AppAccent}"
+                            BorderWidth="1"
+                            CornerRadius="10"
+                            FontSize="15"
+                            Command="{Binding RescheduleCommand}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <Button
+                                Grid.Column="0"
+                                Text="Dismiss"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryBtnLight}, Dark={StaticResource InputBgDark}}"
+                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextLight}, Dark={StaticResource SecondaryTextDark}}"
+                                CornerRadius="10"
+                                FontSize="15"
+                                Command="{Binding DismissConfirmationCommand}" />
+                            <Button
+                                Grid.Column="1"
+                                Text="Accept"
+                                BackgroundColor="{StaticResource AppAccent}"
+                                TextColor="White"
+                                CornerRadius="10"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                Command="{Binding AcceptConfirmationCommand}"
+                                CommandParameter="{x:Null}" />
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- ── Cancel only (conflict flow) ── -->
+                    <Button
+                        IsVisible="{Binding PendingConfirmation.HasConflict}"
+                        Text="Cancel"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryBtnLight}, Dark={StaticResource InputBgDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextLight}, Dark={StaticResource SecondaryTextDark}}"
+                        CornerRadius="10"
+                        FontSize="15"
+                        Command="{Binding DismissConfirmationCommand}" />
+
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- ── Edit Event Overlay ──
+             Overlay is shown/hidden and animated from DayView.xaml.cs code-behind. -->
+        <Grid
+            x:Name="EditOverlay"
+            Grid.RowSpan="3"
+            IsVisible="False"
+            BackgroundColor="#60000000">
+
+            <Border
+                x:Name="EditSheet"
+                VerticalOptions="End"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 20,20,0,0"
+                Padding="20,24,20,36">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Label
+                        Text="Edit Event"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}" />
+
+                    <!-- Validation error -->
+                    <Border
+                        IsVisible="{Binding EditError, Converter={StaticResource IsNotNullConverter}}"
+                        BackgroundColor="{StaticResource AppError}"
+                        Stroke="Transparent"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="12,8">
+                        <Label
+                            Text="{Binding EditError}"
+                            TextColor="White"
+                            FontSize="13" />
+                    </Border>
+
+                    <!-- Title entry -->
+                    <Border
+                        Stroke="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource InputStrokeDark}}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="12,8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource InputBgLight}, Dark={StaticResource InputBgDark}}">
+                        <Entry
+                            Text="{Binding EditTitle, Mode=TwoWay}"
+                            Placeholder="Event title"
+                            PlaceholderColor="{StaticResource SubtleGray}"
+                            FontSize="16"
+                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                            BackgroundColor="Transparent"
+                            ReturnType="Done" />
+                    </Border>
+
+                    <!-- Time pickers -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label
+                                Text="Start time"
+                                FontSize="12"
+                                TextColor="{StaticResource SubtleGray}" />
+                            <TimePicker
+                                Time="{Binding EditStartTime, Mode=TwoWay}"
+                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                                FontSize="15" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label
+                                Text="End time"
+                                FontSize="12"
+                                TextColor="{StaticResource SubtleGray}" />
+                            <TimePicker
+                                Time="{Binding EditEndTime, Mode=TwoWay}"
+                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                                FontSize="15" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Delete -->
+                    <Button
+                        Text="Delete Event"
+                        BackgroundColor="{StaticResource AppError}"
+                        TextColor="White"
+                        CornerRadius="10"
+                        FontSize="15"
+                        Command="{Binding DeleteEditCommand}" />
+
+                    <!-- Save / Cancel -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <Button
+                            Grid.Column="0"
+                            Text="Cancel"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryBtnLight}, Dark={StaticResource InputBgDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextLight}, Dark={StaticResource SecondaryTextDark}}"
+                            CornerRadius="10"
+                            FontSize="15"
+                            Command="{Binding DismissEditCommand}" />
+                        <Button
+                            Grid.Column="1"
+                            Text="Save"
+                            BackgroundColor="{StaticResource AppAccent}"
+                            TextColor="White"
+                            CornerRadius="10"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            Command="{Binding SaveEditCommand}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Property="Opacity" Value="0.35" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
+                        </Button>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
+</ContentPage>

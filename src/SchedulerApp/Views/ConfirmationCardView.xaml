@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    BindingContext = ScheduleResultViewModel
+    Display-only: title, time, reasoning, conflict header, alternatives list.
+    Accept / Dismiss buttons live in DayView.xaml (where BindingContext = DayViewModel).
+-->
+<ContentView
+    x:Class="SchedulerApp.Views.ConfirmationCardView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SchedulerApp.ViewModels">
+
+    <VerticalStackLayout Spacing="14">
+
+        <!-- AI label -->
+        <Label
+            Text="AI SCHEDULED"
+            FontSize="11"
+            FontAttributes="Bold"
+            TextColor="{StaticResource AppAccent}" />
+
+        <!-- Event title (editable) -->
+        <Border
+            Stroke="{AppThemeBinding Light={StaticResource InputStrokeLight}, Dark={StaticResource InputStrokeDark}}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 8"
+            Padding="10,6"
+            BackgroundColor="{AppThemeBinding Light={StaticResource InputBgLight}, Dark={StaticResource InputBgDark}}">
+            <Entry
+                Text="{Binding Title, Mode=TwoWay}"
+                FontSize="18"
+                FontAttributes="Bold"
+                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource White}}"
+                BackgroundColor="Transparent"
+                ReturnType="Done" />
+        </Border>
+
+        <!-- Proposed time -->
+        <Label
+            Text="{Binding TimeRange}"
+            FontSize="14"
+            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextLight}, Dark={StaticResource SecondaryTextDark}}" />
+
+        <!-- Reasoning -->
+        <Border
+            BackgroundColor="{AppThemeBinding Light={StaticResource ReasoningBgLight}, Dark={StaticResource ReasoningBgDark}}"
+            Stroke="{AppThemeBinding Light={StaticResource ReasoningStrokeLight}, Dark={StaticResource ReasoningStrokeDark}}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 8"
+            Padding="12,10">
+            <Label
+                Text="{Binding Reasoning}"
+                FontSize="13"
+                FontAttributes="Italic"
+                TextColor="{AppThemeBinding Light={StaticResource ReasoningTextLight}, Dark={StaticResource ReasoningTextDark}}"
+                LineBreakMode="WordWrap" />
+        </Border>
+
+        <!-- Conflict warning header (only when conflicted) -->
+        <Label
+            IsVisible="{Binding HasConflict}"
+            Text="Conflict — choose an alternative time:"
+            FontSize="13"
+            FontAttributes="Bold"
+            TextColor="{StaticResource AppError}" />
+
+    </VerticalStackLayout>
+
+</ContentView>
