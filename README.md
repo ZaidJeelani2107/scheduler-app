@@ -59,6 +59,18 @@ An AI-powered calendar scheduling app for iOS and Android. Describe what you wan
 
 ---
 
+- Schedule meetings screen:
+
+  <img width="1080" height="2424" alt="android-schedule-meetings" src="https://github.com/user-attachments/assets/b0054e4b-42d8-414f-82a3-68c346405d1a" />
+
+---
+
+- Edit meetings screen:
+
+   <img width="1080" height="2424" alt="android-edit-meetings" src="https://github.com/user-attachments/assets/e83dd5f3-9148-4981-924c-680225b0baf5" />
+
+---
+
 - Work preferences screen:
 
   <img width="1080" height="2424" alt="work-preferences" src="https://github.com/user-attachments/assets/59b4f338-9bf0-4837-bc06-e1403db07e4a" />
